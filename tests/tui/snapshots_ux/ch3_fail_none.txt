@@ -1,0 +1,13 @@
+› 
+
+✗ confirm() reads body.signalgate_log, but the confirm request carries its envelope in
+  body.signalgate
+  app/routes.py:56   ev = sg_event(request, body.user, body.signalgate_log, "playground.s…
+  I confirmed the right token for user u-1042. Your app answered 500: AttributeError:
+  'ConfirmBody' object has no attribute 'signalgate_log'
+  Why: Each request carries its own envelope. The confirm request has only signalgate.
+  Fix: In confirm(), use body.signalgate: ev = sg_event(request, body.user,
+       body.signalgate, "playground.success")
+✗ 1 failed · ✓ 1 passed · ! 0 notes · ◌ 0 not run
+
+Fix it in app/routes.py and save. Press Enter to check again.

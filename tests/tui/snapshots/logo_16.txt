@@ -1,0 +1,11 @@
+[94m                    [0m            
+[94m    ▄▄██▀▀▀▀        [0m            
+[94m  ▄██▀ ▄▄▄█▄        [0m            
+[94m ▄█▀▄██▀▀▄▄▄        [0m            
+[94m ██ ██ ██▀▀▀██      [0m  [1;94mSignalGate[0m
+[94m ▀  ▀  ██           [0m            
+[94m       ▀▀▀███▄      [0m            
+[94m      ▄▄    ▀██     [0m            
+[94m       ██▄▄▄██▀ ███ [0m            
+[94m                    [0m            
+[2;37mSynthetic traffic · real SignalGate verdicts · your code.[0m

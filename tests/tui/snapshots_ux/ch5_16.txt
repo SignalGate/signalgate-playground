@@ -1,0 +1,42 @@
+
+[94m━━[0m [1mChapter 5 of 6 · Turn on protection[0m [94m●●●●●[0m[2;37m○[0m [94m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+Meanwhile, while protection turns on: add the check() gate before the action happens. It reads the 
+signalgate envelope.
+
+[94m╭[0m [1mYour turn · edit app/routes.py[0m [94m──────────────────────────────────────────────────────────────────[0m[94m╮[0m
+[1m1. At the top of app/routes.py[0m, with the other imports:
+
+[94mfrom[0m signalgate [94mimport[0m SignalGateError
+
+[1m2. At the start of action(), before perform_action(body.user):[0m
+
+    ev = sg_event(request, body.user, body.signalgate, [32m"[0m[32mplayground.action[0m[32m"[0m)
+    [94mif[0m ev:
+        [94mtry[0m:
+            [94mif[0m sg().check(ev).action == [32m"[0m[32mblock[0m[32m"[0m:
+                [94mraise[0m HTTPException(status_code=[33m403[0m, detail=[32m"[0m[32mRequest could not be completed[0m[32m"[0m)
+        [94mexcept[0m SignalGateError:
+            [94mpass[0m  [2;37m# SignalGate unreachable or rejected the call: your policy. Here we let it through.[0m
+
+[94m╰[0m /copy copies both · /hint if you get stuck [94m──────────────────────────────────────────────────────[0m[94m╯[0m
+
+[2;37mAdd check() only once the workflow is live. Before that every answer is allow, so the call protects [0m
+[2;37mnothing. And only block stops a request. dry_run_block means 'would block', so let it through. A [0m
+[2;37mrequest with no envelope skips the check: that's the current product policy.[0m
+
+[32m✓[0m Protection is on for the workflow playground.
+
+[1mPress Enter[0m when both edits are in and saved. /hint if you get stuck.
+
+[2;37m✓ Saved. Your change is running.[0m
+› 
+
+[32m✓[0m 5 passed · ! 0 notes · ◌ 0 not run — proven by 6 real events SignalGate accepted.
+[32m✓[0m 3 passed · ! 0 notes · ◌ 0 not run — a rehearsal on your laptop: nothing was sent to
+  SignalGate.
+
+[1;32m★ Your check() gate works. Your code is now stopping the attack.[0m
+
+Your gate works in rehearsal. Now a short readiness round: a few visitors to your sample app on your
+laptop, through your gate.

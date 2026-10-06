@@ -1,0 +1,55 @@
+> 
+
+ Round 1 - one burst - protection stage 3 of 3            measured in your app
+ -------------------------------------------------------------------------------
+                               No SignalGate            With SignalGate
+ Actions performed                     2,000                        541
+ Successes                               400                        400
+ Conversion                            20.0%                      73.9% ^
+ Real users blocked                        --                   0 of 541
+ check() time                              --      median 12 ms - 0 ms inside SignalGate
+                                                  (the rest is network between your
+                                                   machine and SignalGate)
+ -------------------------------------------------------------------------------
+ Dry-run prediction (snapshot)   20.0% -> 66.9%                (dashboard)
+ Full protection (stage 3 of 3).
+ Real SignalGate verdicts on a synthetic attack we built to be clear-cut. Your traffic will differ.
+
+* Done. You integrated SignalGate end to end.
+
+Keep the tutorial workflow running? It only watches playground.* names and never touches your real 
+traffic. You can stop it any time with [] Stop in the dashboard. (yes/no)
+? > yes
+
+Your workflow playground stays on, and the dashboard keeps showing it at work.
+
++ What you built ----------------------------------------------------------------------------------+
+2 x log(), 1 x check(), 1 workflow
+From /start to the results: 25 min
+Next: bring it to your app. The steps are just below.
++--------------------------------------------------------------------------------------------------+
+
+Taking it to your real app:
+  * Create a new workflow for your real app; don't edit playground.
+  * Rename the methods to names for your real action and success, in the form
+    <area>.<action> and <area>.<success>. Names starting with playground. are
+    reserved for the tutorial, so keep them out of your real app.
+  * Build the client with Client(api_key=os.environ["SIGNALGATE_API_KEY"]),
+    with no playground transport.
+  * Set uvicorn's forwarded_allow_ips (or your framework's proxy setting) to your
+    proxy's address.
+
+  - ev = sg_event(request, body.user, body.signalgate_log, "playground.action")
+  + ev = sg_event(request, body.user, body.signalgate_log, "<area>.<action>")
+  - ev = sg_event(request, body.user, body.signalgate, "playground.success")
+  + ev = sg_event(request, body.user, body.signalgate, "<area>.<success>")
+Next:
+  1. In your app's repo, run the Claude Code plugin: /plugin marketplace add
+     SignalGate/signalgate-claude-plugin, /plugin install signalgate@signalgate,
+     then /signalgate:integrate.
+  2. Docs: https://signalgate.ai/docs/backend
+  3. Book a 30-minute call: https://signalgate.ai/about/contact
+  4. The Quick Start steps you just completed count for this workspace. Your real
+     app's events will show up under your own method names.
+
+That's the tutorial. Type /quit to exit.

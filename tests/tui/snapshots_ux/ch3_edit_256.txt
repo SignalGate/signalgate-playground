@@ -1,0 +1,30 @@
+
+[38;5;99m━━[0m [1mChapter 3 of 6 · Teach SignalGate[0m [38;5;99m●●●[0m[2;38;5;245m○○○[0m [38;5;99m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+SignalGate learns which actions turn into successes, so your app logs both.
+
+[38;5;99m╭[0m [1mYour turn · edit app/routes.py[0m [38;5;99m──────────────────────────────────────────────────────────────────[0m[38;5;99m╮[0m
+[1m1. At the top of app/routes.py[0m, with the other imports:
+
+[38;5;99mfrom[0m app.signalgate_client [38;5;99mimport[0m sg, sg_event
+
+[1m2. In action(), right below perform_action(body.user):[0m
+
+    ev = sg_event(request, body.user, body.signalgate_log, [38;5;35m"[0m[38;5;35mplayground.action[0m[38;5;35m"[0m)
+    [38;5;99mif[0m ev:
+        sg().log(ev)
+
+[1m3. In confirm(), right below the token check (after the raise HTTPException(...) line):[0m
+
+    ev = sg_event(request, body.user, body.signalgate, [38;5;35m"[0m[38;5;35mplayground.success[0m[38;5;35m"[0m)
+    [38;5;99mif[0m ev:
+        sg().log(ev)
+
+[38;5;99m╰[0m /copy copies all three · /hint if you get stuck [38;5;99m─────────────────────────────────────────────────[0m[38;5;99m╯[0m
+
+[2;38;5;245mThe action log reads signalgate_log; the success log reads signalgate: each request carries its own [0m
+[2;38;5;245menvelope. A log for an action that never happened would teach SignalGate noise.[0m
+
+[1mPress Enter[0m when all three edits are in.
+
+[2;38;5;245m✓ Saved. Your change is running.[0m

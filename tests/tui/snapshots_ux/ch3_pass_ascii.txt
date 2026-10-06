@@ -1,0 +1,11 @@
+
+v Saved. Your change is running.
+> 
+
+v 5 passed - ! 0 notes - o 0 not run -- proven by 4 real events SignalGate accepted.
+
+* Nailed it: both log() calls are in, and SignalGate accepted real events from them.
+
+Your code checks out. Now I'm sending 2,000 visitors to your sample app on your laptop, through your
+code. Your log() calls send what happens to SignalGate, so it can learn what normal traffic looks 
+like here.

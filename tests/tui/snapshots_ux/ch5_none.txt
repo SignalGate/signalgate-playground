@@ -1,0 +1,42 @@
+
+━━ Chapter 5 of 6 · Turn on protection ●●●●●○ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Meanwhile, while protection turns on: add the check() gate before the action happens. It reads the 
+signalgate envelope.
+
+╭ Your turn · edit app/routes.py ──────────────────────────────────────────────────────────────────╮
+1. At the top of app/routes.py, with the other imports:
+
+from signalgate import SignalGateError
+
+2. At the start of action(), before perform_action(body.user):
+
+    ev = sg_event(request, body.user, body.signalgate, "playground.action")
+    if ev:
+        try:
+            if sg().check(ev).action == "block":
+                raise HTTPException(status_code=403, detail="Request could not be completed")
+        except SignalGateError:
+            pass  # SignalGate unreachable or rejected the call: your policy. Here we let it through.
+
+╰ /copy copies both · /hint if you get stuck ──────────────────────────────────────────────────────╯
+
+Add check() only once the workflow is live. Before that every answer is allow, so the call protects 
+nothing. And only block stops a request. dry_run_block means 'would block', so let it through. A 
+request with no envelope skips the check: that's the current product policy.
+
+✓ Protection is on for the workflow playground.
+
+Press Enter when both edits are in and saved. /hint if you get stuck.
+
+✓ Saved. Your change is running.
+› 
+
+✓ 5 passed · ! 0 notes · ◌ 0 not run — proven by 6 real events SignalGate accepted.
+✓ 3 passed · ! 0 notes · ◌ 0 not run — a rehearsal on your laptop: nothing was sent to
+  SignalGate.
+
+★ Your check() gate works. Your code is now stopping the attack.
+
+Your gate works in rehearsal. Now a short readiness round: a few visitors to your sample app on your
+laptop, through your gate.

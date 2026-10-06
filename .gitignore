@@ -1,0 +1,23 @@
+# Local-only files: never tracked
+CLAUDE.md
+.claude/
+.dreamteam/
+*spec*.md
+*ARCHITECTURE*
+
+# Runtime state and secrets
+.playground/
+app/.env
+
+# Python tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store

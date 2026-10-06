@@ -1,0 +1,11 @@
+                                
+    ▄▄██▀▀▀▀                    
+  ▄██▀ ▄▄▄█▄                    
+ ▄█▀▄██▀▀▄▄▄                    
+ ██ ██ ██▀▀▀██        SignalGate
+ ▀  ▀  ██                       
+       ▀▀▀███▄                  
+      ▄▄    ▀██                 
+       ██▄▄▄██▀ ███             
+                                
+Synthetic traffic · real SignalGate verdicts · your code.

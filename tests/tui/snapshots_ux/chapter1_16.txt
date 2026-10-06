@@ -1,0 +1,43 @@
+› /start
+
+[94m━━[0m [1mChapter 1 of 6 · Meet the attack[0m [94m●[0m[2;37m○○○○○[0m [94m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+I'm sending 10,000 simulated visitors to the sample app I started on your laptop. Each one is a real
+request to it. No SignalGate yet, and nothing leaves your machine.
+
+[94m╭─[0m[94m──────────────────────────────────[0m[94m Chapter 1 · no SignalGate [0m[94m───────────────────────────────────[0m[94m─╮[0m
+[94m│[0m [2;37mVisitors  [0m[2;37m  [0m10,000 of 10,000                                                                     [94m│[0m
+[94m│[0m [2;37mActions   [0m[2;37m  [0m          10,000                                                                     [94m│[0m
+[94m│[0m [2;37mSuccesses [0m[2;37m  [0m           2,000                                                                     [94m│[0m
+[94m│[0m [2;37mConversion[0m[2;37m  [0m           20.0%                                                                     [94m│[0m
+[94m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+
+20.0% of actions turned into a success. 7 in 10 were the attack. [1mReady to connect SignalGate?[0m 
+(yes/no)
+? › 
+
+20.0% of actions turned into a success. 7 in 10 were the attack. [1mReady to connect SignalGate?[0m 
+(yes/no)
+? › yes
+
+[1;32m★ Chapter 1 done. You've seen what the attack does to conversion.[0m
+
+[94m━━[0m [1mChapter 2 of 6 · Connect[0m [94m●●[0m[2;37m○○○○[0m [94m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+To connect, I need your SignalGate API key in app/.env.
+
+New to SignalGate?
+  1. Sign up at https://signalgate.ai/signup?utm_source=playground&utm_medium=cli&utm_campaign=0.0.1
+  2. Verify your email.
+  3. Open API access and create an API key and a public key.
+  4. Paste the API key into app/.env.
+
+Already have a workspace?
+  Create a separate API key named playground in API access, and revoke it when
+  you're done. Or use the key you already have.
+  Never revoke a key your live app uses. If you don't have your key, ask your
+  workspace owner, or use a separate workspace with another email.
+  If you're a member (read-only), you won't be able to create the workflow in
+  chapter 4.
+
+Put your API key in app/.env after SIGNALGATE_API_KEY= and save it. [1mPress Enter[0m when it's saved.

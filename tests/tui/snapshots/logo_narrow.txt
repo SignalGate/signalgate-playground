@@ -1,0 +1,3 @@
+[1;38;2;99;91;255mSignalGate[0m
+[2;38;2;139;143;152mSynthetic traffic · real SignalGate [0m
+[2;38;2;139;143;152mverdicts · your code.[0m

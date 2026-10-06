@@ -1,0 +1,13 @@
+# Changes to these paths need a review from a SignalGate maintainer: the
+# console's words, the docs, the contracts, the local timing constants, CI and
+# the disclosure check itself. Branch protection must require code-owner review
+# for this to take effect.
+
+/playground/copy/ @luckyseadog
+/README.md @luckyseadog
+/docs/ @luckyseadog
+/contracts/ @luckyseadog
+/playground/traffic/local_constants.py @luckyseadog
+/app/kit/local_constants.py @luckyseadog
+/.github/ @luckyseadog
+/scripts/disclosure_scan.py @luckyseadog

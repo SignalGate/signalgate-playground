@@ -1,0 +1,27 @@
+Chapter 5 reference, on top of chapter 3: check() before the action, stop only on block.
+Apply after chapter 3 with: git apply solutions/chapter5.diff
+
+--- a/app/routes.py
++++ b/app/routes.py
+@@ -18,6 +18,7 @@ from typing import Any
+ 
+ from fastapi import APIRouter, HTTPException, Request
+ from pydantic import BaseModel
++from signalgate import SignalGateError
+ 
+ from app.kit import tokens
+ from app.kit.actions import perform_action
+@@ -40,6 +41,13 @@ class ConfirmBody(BaseModel):
+ 
+ @router.post("/api/action")
+ def action(request: Request, body: ActionBody) -> dict[str, bool]:
++    ev = sg_event(request, body.user, body.signalgate, "playground.action")
++    if ev:
++        try:
++            if sg().check(ev).action == "block":
++                raise HTTPException(status_code=403, detail="Request could not be completed")
++        except SignalGateError:
++            pass  # SignalGate unreachable or rejected the call: your policy. Here we let it through.
+     # the action happens here
+     perform_action(body.user)
+     ev = sg_event(request, body.user, body.signalgate_log, "playground.action")

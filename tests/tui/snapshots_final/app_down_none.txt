@@ -1,0 +1,50 @@
+                                
+    ▄▄██▀▀▀▀                    
+  ▄██▀ ▄▄▄█▄                    
+ ▄█▀▄██▀▀▄▄▄                    
+ ██ ██ ██▀▀▀██        SignalGate
+ ▀  ▀  ██                       
+       ▀▀▀███▄                  
+      ▄▄    ▀██                 
+       ██▄▄▄██▀ ███             
+                                
+Synthetic traffic · real SignalGate verdicts · your code.
+
+Starting the sample app…
+
+The sample app didn't start: app/routes.py:9. Fix it and save; I'll restart it. Its output is in 
+.playground/app.log.
+
+Here's what will happen:
+
+1. I'll send 10,000 visitors to a small app on your laptop. The visitors are real
+   requests to the sample app I just started on your laptop. Each one triggers a
+   protected action: the kind of action attackers abuse. Most of them are an
+   attack: they trigger the action and never finish. You'll see how many actions
+   turn into a real success. No SignalGate yet, no account needed.
+2. You'll add two log() calls. Then I'll send a couple of thousand visitors through
+   your code so SignalGate can learn what normal traffic looks like here.
+3. You'll create a workflow in the dashboard and run a dry run: a one-time
+   prediction of what blocking would change. A workflow needs enough events first:
+   at least 1,000 actions is recommended, and we'll send more than that.
+4. Once the workflow is live, you'll add one check() call before the action.
+   Only then does SignalGate start deciding.
+5. I'll run the traffic again and show you the before and after.
+
+In a real app, SignalGate's browser script creates a sealed, single-use envelope for
+every request, and your frontend sends it to your backend. Here I play the frontend:
+I ask SignalGate for envelopes and attach them the way your frontend would. I can't
+open them either. Only SignalGate can.
+
+Type /start when you're ready.
+
+› /start
+
+The sample app isn't running. Fix the error above and save the file; I'll restart it.
+
+✓ Saved. Your change is running.
+› /quit
+
+I couldn't save your progress to .playground/state.json, so /continue won't have it next time.
+
+Bye. Run uv run playground to start again.

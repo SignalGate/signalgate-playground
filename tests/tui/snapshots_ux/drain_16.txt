@@ -1,0 +1,15 @@
+Sending your app's queued logs to SignalGate ▕[94m████[0m[2;37m░░░░[0m▏ 480 / 922 · about 30 s left · Ctrl-C to skip
+Sending your app's queued logs to SignalGate ▕[94m██[0m[2;37m░░[0m▏ 480 / 922 · about 30 s left · Ctrl-C to quit now
+[32m✓[0m All queued logs sent.
+
+[94m╭─[0m[94m───────────────────────────────────[0m[94m Chapter 3 · learning run [0m[94m───────────────────────────────────[0m[94m─╮[0m
+[94m│[0m [2;37mVisitors              [0m[2;37m  [0m                                    2,000 of 2,000                       [94m│[0m
+[94m│[0m [2;37mActions               [0m[2;37m  [0m                                             2,000                       [94m│[0m
+[94m│[0m [2;37mSuccesses             [0m[2;37m  [0m                                               400                       [94m│[0m
+[94m│[0m [2;37mConversion            [0m[2;37m  [0m                                             20.0%                       [94m│[0m
+[94m│[0m [2;37mLogged by your code   [0m[2;37m  [0m                                             2,400                       [94m│[0m
+[94m│[0m [2;37mDelivered by your app [0m[2;37m  [0m▕[94m█████████[0m[2;37m░░░░░░░[0m▏ 1,478 / 2,400 · about 50 s left                       [94m│[0m
+[94m│[0m [2;37mAccepted by SignalGate[0m[2;37m  [0m                                             1,478                       [94m│[0m
+[94m│[0m [2;37mStored by SignalGate  [0m[2;37m  [0m                                                 -                       [94m│[0m
+[94m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+[2;37mYour app's SDK sends logs one at a time, so delivery trails the visitors a little. Ctrl-C to skip.[0m

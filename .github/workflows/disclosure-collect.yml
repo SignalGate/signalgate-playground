@@ -1,0 +1,71 @@
+name: Disclosure collect
+
+# The first half of the disclosure check. For each pull request it records what
+# the change touches: the pull request's number, its head and base commits, the
+# paths it changes and a copy of the changed files, as one artifact. It holds no
+# secrets, runs nothing from the pull request, and decides nothing.
+#
+# The "Disclosure" workflow picks the artifact up once this run completes. It
+# uses the artifact only to cross-check what it reads for itself, since a pull
+# request from a fork can change this file in its own copy.
+
+on:
+  pull_request:
+    # "edited" re-runs the check when a PR's title or body changes, since both
+    # are scanned too.
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The change's files are only read as git objects below; nothing in the
+      # checkout is run, imported or used as configuration.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Collect
+        working-directory: ${{ runner.temp }}
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          repo="$GITHUB_WORKSPACE"
+          out="$RUNNER_TEMP/disclosure-input"
+          mkdir -p "$out/files"
+          # Every path the change touches, NUL-separated so any name survives;
+          # a rename counts as both of its names.
+          git -C "$repo" diff --name-only -z --no-renames "$BASE_SHA...$HEAD_SHA" > paths
+          jq -n \
+            --argjson pr_number "$PR_NUMBER" \
+            --arg head_sha "$HEAD_SHA" \
+            --arg base_sha "$BASE_SHA" \
+            --rawfile paths paths \
+            '{pr_number: $pr_number, head_sha: $head_sha, base_sha: $base_sha,
+              changed_paths: ($paths | split("\u0000") | map(select(length > 0)))}' \
+            > "$out/input.json"
+          # The raw bytes of each changed file the head commit still has.
+          while IFS= read -r -d '' path; do
+            if [ "$(git -C "$repo" cat-file -t "$HEAD_SHA:$path" 2>/dev/null)" = blob ]; then
+              mkdir -p "$out/files/$(dirname -- "$path")"
+              git -C "$repo" cat-file blob "$HEAD_SHA:$path" > "$out/files/$path"
+            fi
+          done < paths
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: disclosure-input
+          path: ${{ runner.temp }}/disclosure-input
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 5

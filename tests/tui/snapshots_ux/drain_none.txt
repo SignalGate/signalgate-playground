@@ -1,0 +1,15 @@
+Sending your app's queued logs to SignalGate ▕████░░░░▏ 480 / 922 · about 30 s left · Ctrl-C to skip
+Sending your app's queued logs to SignalGate ▕██░░▏ 480 / 922 · about 30 s left · Ctrl-C to quit now
+✓ All queued logs sent.
+
+╭──────────────────────────────────── Chapter 3 · learning run ────────────────────────────────────╮
+│ Visitors                                                    2,000 of 2,000                       │
+│ Actions                                                              2,000                       │
+│ Successes                                                              400                       │
+│ Conversion                                                           20.0%                       │
+│ Logged by your code                                                  2,400                       │
+│ Delivered by your app   ▕█████████░░░░░░░▏ 1,478 / 2,400 · about 50 s left                       │
+│ Accepted by SignalGate                                               1,478                       │
+│ Stored by SignalGate                                                     -                       │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+Your app's SDK sends logs one at a time, so delivery trails the visitors a little. Ctrl-C to skip.

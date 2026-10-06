@@ -1,0 +1,229 @@
+name: Disclosure
+
+# Scans each change against a private deny-list and reports PASS or FAIL,
+# nothing more. The list comes from the DISCLOSURE_DENY_LIST repository secret,
+# base64-encoded on one line so the log masks it as a single value; without it
+# the check fails.
+#
+# scan-pr judges a pull request once "Disclosure collect" has run for it. It
+# runs this repository's own copy of the scanner from the default branch and
+# never runs, imports, installs or configures anything from the pull request:
+# it fetches the head commit's objects into a scratch repository outside the
+# workspace, with no checkout, and reads the changed files from there as raw
+# bytes. The artifact from "Disclosure collect" is only a cross-check. The
+# verdict reaches the pull request as the "Disclosure" commit status.
+#
+# pending runs first on every pull-request run, with no environment, no
+# checkout and no secrets, and sets that status to pending on the head commit.
+# So while scan-pr waits for approval, an earlier verdict never stands for text
+# that has changed since, such as an edited title or body. It runs as soon as a
+# collect run is requested, and again when it completes.
+#
+# scan-tree scans every tracked file on main and the messages of the commits
+# each push brings (a squash merge copies a pull request's title and body into
+# its message), and the tracked files on demand.
+
+on:
+  workflow_run:
+    workflows: ["Disclosure collect"]
+    types: [requested, completed]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+# One run at a time for each pull-request head commit, and a newer run cancels
+# an older one, so the status on a commit always comes from the latest run.
+# A push or a manual run has no workflow_run and gets a group of its own, so
+# those never cancel each other.
+concurrency:
+  group: disclosure-${{ github.event.workflow_run.head_sha || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  pending:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      statuses: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Mark the status pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api --method POST "repos/$GH_REPO/statuses/$HEAD_SHA" \
+            -f state=pending -f context=Disclosure \
+            -f description="Waiting for the scan" -f target_url="$RUN_URL" > /dev/null
+
+  scan-pr:
+    needs: pending
+    if: >-
+      github.event_name == 'workflow_run'
+      && github.event.workflow_run.event == 'pull_request'
+      && github.event.action == 'completed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Required reviewers on this environment decide when a pull request's scan
+    # may run with the list.
+    environment: disclosure
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      statuses: write
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: disclosure-input
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/input
+
+      # Which pull request this is, confirmed with the API, and the files it
+      # changes, taken from the API and compared with the artifact's list.
+      - name: Confirm the pull request
+        working-directory: ${{ runner.temp }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_PRS: ${{ toJSON(github.event.workflow_run.pull_requests) }}
+        run: |
+          fail() { echo "FAIL ($*)"; exit 1; }
+          input="$RUNNER_TEMP/input/input.json"
+          pr="$(jq -r '.pr_number' "$input")" || fail "the pull request could not be confirmed"
+          [[ "$pr" =~ ^[1-9][0-9]{0,9}$ ]] || fail "the pull request could not be confirmed"
+          [ "$(jq -r '.head_sha' "$input")" = "$HEAD_SHA" ] \
+            || fail "the pull request could not be confirmed"
+          if [ "$(jq 'length' <<< "$RUN_PRS")" -gt 0 ]; then
+            jq -e --argjson pr "$pr" 'any(.[]; .number == $pr)' <<< "$RUN_PRS" > /dev/null \
+              || fail "the pull request could not be confirmed"
+          fi
+          gh api "repos/$GH_REPO/pulls/$pr" > pr.json
+          [ "$(jq -r '.head.sha' pr.json)" = "$HEAD_SHA" ] \
+            || fail "the pull request has moved on"
+
+          gh api --paginate "repos/$GH_REPO/pulls/$pr/files?per_page=100" > files.json
+          [ "$(jq -s 'map(length) | add // 0' files.json)" = "$(jq '.changed_files' pr.json)" ] \
+            || fail "the changed files could not be listed"
+          jq -j '.[] | (.filename, (select(.status == "renamed") | .previous_filename))
+                 | . + "\u0000"' files.json | LC_ALL=C sort -z -u > paths
+          jq -j '.changed_paths[] | . + "\u0000"' "$input" | LC_ALL=C sort -z -u > listed
+          cmp -s paths listed || fail "the changed files do not match"
+
+          mkdir -p text
+          jq -j '.title // ""' pr.json > text/title
+          jq -j '.body // ""' pr.json > text/body
+          gh api --paginate "repos/$GH_REPO/pulls/$pr/commits?per_page=100" > commits.json
+          [ "$(jq -s 'map(length) | add // 0' commits.json)" = "$(jq '.commits' pr.json)" ] \
+            || fail "the commits could not be listed"
+          jq -j '.[] | .commit.message + "\n"' commits.json > text/messages
+
+      # The head commit's objects only: no checkout, outside the workspace.
+      - name: Fetch the head commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          git init -q "$RUNNER_TEMP/pr"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          GIT_TERMINAL_PROMPT=0 git -C "$RUNNER_TEMP/pr" \
+            -c "http.extraheader=AUTHORIZATION: basic $auth" \
+            fetch -q --depth=1 --no-tags --no-recurse-submodules \
+            "$SERVER_URL/$GH_REPO" "$HEAD_SHA"
+
+      - name: Scan
+        id: scan
+        env:
+          DISCLOSURE_DENY_LIST: ${{ secrets.DISCLOSURE_DENY_LIST }}
+        run: |
+          if verdict="$(python3 scripts/disclosure_scan.py \
+              --git-dir "$RUNNER_TEMP/pr/.git" \
+              --head "$HEAD_SHA" \
+              --paths-file "$RUNNER_TEMP/paths" \
+              --maintainer-paths '.github/**,pyproject.toml,uv.lock' \
+              --text-file "$RUNNER_TEMP/text/title" \
+              --text-file "$RUNNER_TEMP/text/body" \
+              --text-file "$RUNNER_TEMP/text/messages")"; then
+            code=0
+          else
+            code=$?
+          fi
+          case "$verdict" in
+            "PASS" | "FAIL" | "FAIL (needs a maintainer)" \
+              | "FAIL (the check isn't configured)" | "FAIL (the check's self-test failed)") ;;
+            *) verdict="FAIL" ;;
+          esac
+          if [ "$code" -ne 0 ] && [ "$verdict" = "PASS" ]; then verdict="FAIL"; fi
+          echo "$verdict"
+          echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+          [ "$verdict" = "PASS" ]
+
+      # Success only when every step before this one succeeded: a run that a
+      # newer one cancelled after its scan passed reports a failure instead.
+      - name: Report
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERDICT: ${{ steps.scan.outputs.verdict }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          state=failure
+          description="${VERDICT:-FAIL}"
+          if [ "$description" = "PASS" ] && [ "$JOB_STATUS" = "success" ]; then
+            state=success
+          elif [ "$description" = "PASS" ]; then
+            description="FAIL"
+          fi
+          gh api --method POST "repos/$GH_REPO/statuses/$HEAD_SHA" \
+            -f state="$state" -f context=Disclosure \
+            -f description="$description" -f target_url="$RUN_URL" > /dev/null
+
+  scan-tree:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # Every commit, so the push's earlier head and all that came after it
+      # are here to read.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # On a push, also the messages of the commits it brought: after the
+      # earlier head, or every commit when the push created the branch. An
+      # earlier head that can't be read (gone after a force push) fails.
+      - name: Scan
+        env:
+          DISCLOSURE_DENY_LIST: ${{ secrets.DISCLOSURE_DENY_LIST }}
+          PUSHED_FROM: ${{ github.event.before }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            python3 scripts/disclosure_scan.py --messages-since "$PUSHED_FROM"
+          else
+            python3 scripts/disclosure_scan.py
+          fi

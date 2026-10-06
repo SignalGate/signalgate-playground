@@ -1,0 +1,42 @@
+
+[38;2;99;91;255m━━[0m [1mChapter 5 of 6 · Turn on protection[0m [38;2;99;91;255m●●●●●[0m[2;38;2;139;143;152m○[0m [38;2;99;91;255m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+Meanwhile, while protection turns on: add the check() gate before the action happens. It reads the 
+signalgate envelope.
+
+[38;2;99;91;255m╭[0m [1mYour turn · edit app/routes.py[0m [38;2;99;91;255m──────────────────────────────────────────────────────────────────[0m[38;2;99;91;255m╮[0m
+[1m1. At the top of app/routes.py[0m, with the other imports:
+
+[38;2;99;91;255mfrom[0m signalgate [38;2;99;91;255mimport[0m SignalGateError
+
+[1m2. At the start of action(), before perform_action(body.user):[0m
+
+    ev = sg_event(request, body.user, body.signalgate, [38;2;14;159;110m"[0m[38;2;14;159;110mplayground.action[0m[38;2;14;159;110m"[0m)
+    [38;2;99;91;255mif[0m ev:
+        [38;2;99;91;255mtry[0m:
+            [38;2;99;91;255mif[0m sg().check(ev).action == [38;2;14;159;110m"[0m[38;2;14;159;110mblock[0m[38;2;14;159;110m"[0m:
+                [38;2;99;91;255mraise[0m HTTPException(status_code=[38;2;245;158;11m403[0m, detail=[38;2;14;159;110m"[0m[38;2;14;159;110mRequest could not be completed[0m[38;2;14;159;110m"[0m)
+        [38;2;99;91;255mexcept[0m SignalGateError:
+            [38;2;99;91;255mpass[0m  [2;38;2;139;143;152m# SignalGate unreachable or rejected the call: your policy. Here we let it through.[0m
+
+[38;2;99;91;255m╰[0m /copy copies both · /hint if you get stuck [38;2;99;91;255m──────────────────────────────────────────────────────[0m[38;2;99;91;255m╯[0m
+
+[2;38;2;139;143;152mAdd check() only once the workflow is live. Before that every answer is allow, so the call protects [0m
+[2;38;2;139;143;152mnothing. And only block stops a request. dry_run_block means 'would block', so let it through. A [0m
+[2;38;2;139;143;152mrequest with no envelope skips the check: that's the current product policy.[0m
+
+[38;2;14;159;110m✓[0m Protection is on for the workflow playground.
+
+[1mPress Enter[0m when both edits are in and saved. /hint if you get stuck.
+
+[2;38;2;139;143;152m✓ Saved. Your change is running.[0m
+› 
+
+[38;2;14;159;110m✓[0m 5 passed · ! 0 notes · ◌ 0 not run — proven by 6 real events SignalGate accepted.
+[38;2;14;159;110m✓[0m 3 passed · ! 0 notes · ◌ 0 not run — a rehearsal on your laptop: nothing was sent to
+  SignalGate.
+
+[1;38;2;14;159;110m★ Your check() gate works. Your code is now stopping the attack.[0m
+
+Your gate works in rehearsal. Now a short readiness round: a few visitors to your sample app on your
+laptop, through your gate.

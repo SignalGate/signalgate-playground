@@ -1,0 +1,1310 @@
+{
+  "title": "Sample app control plane",
+  "version": 1,
+  "dialect": "https://json-schema.org/draft/2020-12/schema",
+  "request_headers": {
+    "control": {
+      "applies_to": "every /__playground request",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "Authorization": {
+            "type": "string"
+          },
+          "X-Playground-Run": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Authorization"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "visitor": {
+      "applies_to": "a visitor's POST /api/action and POST /api/confirm",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "X-Playground-Ref": {
+            "type": "string"
+          },
+          "X-Forwarded-For": {
+            "type": "string"
+          },
+          "X-Playground-Run": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "X-Playground-Ref",
+          "X-Forwarded-For"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "routes": {
+    "health": {
+      "method": "GET",
+      "path": "/__playground/health",
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "boot_id": {
+                "type": "string"
+              },
+              "sdk": {
+                "const": "signalgate"
+              },
+              "sdk_version": {
+                "type": "string"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "playground.action",
+                    "playground.success"
+                  ]
+                }
+              },
+              "clients_created": {
+                "type": "integer"
+              },
+              "client_ready": {
+                "type": "boolean"
+              },
+              "self_test": {
+                "type": "object",
+                "properties": {
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "failed": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "sdk_version",
+                        "transport_import",
+                        "transport_signature",
+                        "transport_protocol",
+                        "facade",
+                        "client_hook",
+                        "probe_hooks",
+                        "exit_hook"
+                      ]
+                    }
+                  },
+                  "checks": {
+                    "type": "object",
+                    "properties": {
+                      "sdk_version": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "transport_import": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "transport_signature": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "transport_protocol": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "facade": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "client_hook": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "probe_hooks": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      },
+                      "exit_hook": {
+                        "enum": [
+                          "pass",
+                          "fail",
+                          "skip"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "sdk_version",
+                      "transport_import",
+                      "transport_signature",
+                      "transport_protocol",
+                      "facade",
+                      "client_hook",
+                      "probe_hooks",
+                      "exit_hook"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "ok",
+                  "failed",
+                  "checks"
+                ],
+                "additionalProperties": false
+              },
+              "key": {
+                "enum": [
+                  "absent",
+                  "placeholder",
+                  "invalid",
+                  "set"
+                ]
+              }
+            },
+            "required": [
+              "boot_id",
+              "sdk",
+              "sdk_version",
+              "methods",
+              "clients_created",
+              "client_ready",
+              "self_test",
+              "key"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "metrics": {
+      "method": "GET",
+      "path": "/__playground/metrics",
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "ledger": {
+      "method": "GET",
+      "path": "/__playground/ledger",
+      "query": [
+        "run",
+        "cursor",
+        "limit"
+      ],
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "action"
+                        },
+                        "seq": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "user": {
+                          "type": "string"
+                        },
+                        "client_ip": {
+                          "type": "string"
+                        },
+                        "run": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "seq",
+                        "ref",
+                        "user",
+                        "client_ip",
+                        "run"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "inbox"
+                        },
+                        "seq": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "run": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "seq",
+                        "ref",
+                        "run"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "confirm"
+                        },
+                        "seq": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "ok": {
+                          "type": "boolean"
+                        },
+                        "run": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "seq",
+                        "ref",
+                        "ok",
+                        "run"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "cursor": {
+                "type": "integer"
+              },
+              "more": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "entries",
+              "cursor",
+              "more"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "const": "validation_error"
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "calls": {
+      "method": "GET",
+      "path": "/__playground/calls",
+      "query": [
+        "cursor",
+        "limit"
+      ],
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "v": {
+                "const": 1
+              },
+              "boot_id": {
+                "type": "string"
+              },
+              "records": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "call"
+                        },
+                        "op": {
+                          "enum": [
+                            "log",
+                            "check",
+                            "close",
+                            "enter",
+                            "exit"
+                          ]
+                        },
+                        "seq": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "run": {
+                          "type": "string"
+                        },
+                        "site": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "integer"
+                                },
+                                "func": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line",
+                                "func"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "thread": {
+                          "type": "string"
+                        },
+                        "on_loop": {
+                          "type": "boolean"
+                        },
+                        "arg_type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "payload_type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "method": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "user_id": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "ip": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "timestamp": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "nonce": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "t0": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "t1": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "outcome": {
+                          "enum": [
+                            "verdict",
+                            "failed_open",
+                            "raised",
+                            "enqueued",
+                            "not_enqueued",
+                            "returned"
+                          ]
+                        },
+                        "action": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "processing_time_us": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "log_job": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "error": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "type": [
+                                    "integer",
+                                    "null"
+                                  ]
+                                },
+                                "code": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "status",
+                                "code"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "op",
+                        "seq",
+                        "ref",
+                        "run",
+                        "site",
+                        "thread",
+                        "on_loop",
+                        "arg_type",
+                        "payload_type",
+                        "method",
+                        "user_id",
+                        "ip",
+                        "timestamp",
+                        "nonce",
+                        "t0",
+                        "t1",
+                        "outcome",
+                        "action",
+                        "processing_time_us",
+                        "log_job",
+                        "error"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "attempt"
+                        },
+                        "endpoint": {
+                          "enum": [
+                            "check",
+                            "log",
+                            "other"
+                          ]
+                        },
+                        "call_seq": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "log_job": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "attempt": {
+                          "type": "integer"
+                        },
+                        "method": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "nonce": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "idempotency_key": {
+                          "type": "string"
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "error_class": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "timed_out": {
+                          "type": "boolean"
+                        },
+                        "timeout_phase": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "connect",
+                                "read"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "verdict": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "processing_time_us": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "local": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "enum": [
+                                "guard",
+                                "canary"
+                              ]
+                            }
+                          ]
+                        },
+                        "t0": {
+                          "type": "number"
+                        },
+                        "t1": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "endpoint",
+                        "call_seq",
+                        "log_job",
+                        "attempt",
+                        "method",
+                        "nonce",
+                        "idempotency_key",
+                        "request_id",
+                        "status",
+                        "code",
+                        "error_class",
+                        "timed_out",
+                        "timeout_phase",
+                        "verdict",
+                        "processing_time_us",
+                        "local",
+                        "t0",
+                        "t1"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "construct"
+                        },
+                        "seq": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "run": {
+                          "type": "string"
+                        },
+                        "site": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "integer"
+                                },
+                                "func": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line",
+                                "func"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "thread": {
+                          "type": "string"
+                        },
+                        "singleton": {
+                          "type": "boolean"
+                        },
+                        "kit_transport": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "seq",
+                        "ref",
+                        "run",
+                        "site",
+                        "thread",
+                        "singleton",
+                        "kit_transport"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "cursor": {
+                "type": "integer"
+              },
+              "more": {
+                "type": "boolean"
+              },
+              "oldest_cursor": {
+                "type": "integer"
+              },
+              "truncated": {
+                "type": "boolean"
+              },
+              "record_errors": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "v",
+              "boot_id",
+              "records",
+              "cursor",
+              "more",
+              "oldest_cursor",
+              "truncated",
+              "record_errors"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "const": "validation_error"
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "canary": {
+      "method": "POST",
+      "path": "/__playground/canary",
+      "request": {
+        "type": "object",
+        "properties": {
+          "canaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nonce": {
+                  "type": "string"
+                },
+                "answer": {
+                  "enum": [
+                    "block",
+                    "dry_run_block",
+                    "admin_alert",
+                    "422"
+                  ]
+                },
+                "delay_ms": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "nonce",
+                "answer",
+                "delay_ms"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "canaries"
+        ],
+        "additionalProperties": false
+      },
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "registered": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "registered"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "const": "validation_error"
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "shutdown": {
+      "method": "POST",
+      "path": "/__playground/shutdown",
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "boot_id": {
+                "type": "string"
+              },
+              "closed": {
+                "type": "boolean"
+              },
+              "metrics": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {
+                        "type": "integer"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "ok",
+              "boot_id",
+              "closed",
+              "metrics"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "inbox": {
+      "method": "GET",
+      "path": "/__playground/inbox",
+      "query": [
+        "ref"
+      ],
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "tokens": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "tokens"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "unauthorized"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "403": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+
+== Chapter 3 of 6 - Teach SignalGate [###---] ======================================================
+
+SignalGate learns which actions turn into successes, so your app logs both.
+
++ Your turn - edit app/routes.py ------------------------------------------------------------------+
+1. At the top of app/routes.py, with the other imports:
+
+from app.signalgate_client import sg, sg_event
+
+2. In action(), right below perform_action(body.user):
+
+    ev = sg_event(request, body.user, body.signalgate_log, "playground.action")
+    if ev:
+        sg().log(ev)
+
+3. In confirm(), right below the token check (after the raise HTTPException(...) line):
+
+    ev = sg_event(request, body.user, body.signalgate, "playground.success")
+    if ev:
+        sg().log(ev)
+
++ /copy copies all three - /hint if you get stuck -------------------------------------------------+
+
+The action log reads signalgate_log; the success log reads signalgate: each request carries its own 
+envelope. A log for an action that never happened would teach SignalGate noise.
+
+Press Enter when all three edits are in.
+
+v Saved. Your change is running.

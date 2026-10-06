@@ -1,0 +1,1706 @@
+{
+  "title": "SignalGate playground API",
+  "version": 1,
+  "dialect": "https://json-schema.org/draft/2020-12/schema",
+  "request_headers": {
+    "api": {
+      "applies_to": "every /v0/playground request",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "SignalGate-Playground-Protocol": {
+            "const": "1"
+          },
+          "Authorization": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "SignalGate-Playground-Protocol",
+          "Authorization"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "routes": {
+    "create_session": {
+      "method": "POST",
+      "path": "/v0/playground/sessions",
+      "request": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "integer"
+          },
+          "client_version": {
+            "type": "string"
+          },
+          "consent_version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "size",
+          "client_version",
+          "consent_version"
+        ],
+        "additionalProperties": false
+      },
+      "responses": {
+        "201": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string"
+              },
+              "methods": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "const": "playground.action"
+                  },
+                  "target": {
+                    "const": "playground.success"
+                  }
+                },
+                "required": [
+                  "action",
+                  "target"
+                ],
+                "additionalProperties": false
+              },
+              "workflow_name": {
+                "const": "playground"
+              },
+              "plan_version": {
+                "type": "string"
+              },
+              "consent_text_version": {
+                "type": "string"
+              },
+              "limits": {
+                "type": "object",
+                "properties": {
+                  "max_size": {
+                    "type": "integer"
+                  },
+                  "lease_max": {
+                    "type": "integer"
+                  },
+                  "use_within_s": {
+                    "type": "number"
+                  },
+                  "max_queue_age_s": {
+                    "type": "number"
+                  },
+                  "clock_warn_s": {
+                    "type": "number"
+                  },
+                  "clock_block_s": {
+                    "type": "number"
+                  },
+                  "readiness_retry_s": {
+                    "type": "number"
+                  },
+                  "readiness_max_attempts": {
+                    "type": "integer"
+                  },
+                  "ingest_wait_s": {
+                    "type": "number"
+                  },
+                  "protect_diagnose_after_s": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "max_size",
+                  "lease_max",
+                  "use_within_s",
+                  "max_queue_age_s",
+                  "clock_warn_s",
+                  "clock_block_s",
+                  "readiness_retry_s",
+                  "readiness_max_attempts",
+                  "ingest_wait_s",
+                  "protect_diagnose_after_s"
+                ],
+                "additionalProperties": false
+              },
+              "server_time": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "session_id",
+              "methods",
+              "workflow_name",
+              "plan_version",
+              "consent_text_version",
+              "limits",
+              "server_time"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "409": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": "SESSION_ACTIVE"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  },
+                  "details": {
+                    "type": "object",
+                    "properties": {
+                      "started_at": {
+                        "type": "string"
+                      },
+                      "key_prefix": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "started_at",
+                      "key_prefix"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id",
+                  "details"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "412": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": "NO_ACTIVE_PUBLIC_KEY"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "426": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "429": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          "headers": [
+            "Retry-After"
+          ]
+        }
+      }
+    },
+    "lease": {
+      "method": "POST",
+      "path": "/v0/playground/sessions/{sid}/leases",
+      "request": {
+        "type": "object",
+        "properties": {
+          "phase": {
+            "enum": [
+              "learn",
+              "protect",
+              "readiness",
+              "probe"
+            ]
+          },
+          "round": {
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "count": {
+            "type": "integer"
+          },
+          "seq": {
+            "type": "integer"
+          },
+          "probe_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "phase",
+          "count",
+          "seq"
+        ],
+        "additionalProperties": false
+      },
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "seq": {
+                "type": "integer"
+              },
+              "expires_at": {
+                "type": "string"
+              },
+              "visits": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string"
+                    },
+                    "class": {
+                      "enum": [
+                        "real",
+                        "attack"
+                      ]
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "client_ip": {
+                      "type": "string"
+                    },
+                    "script": {
+                      "type": "object",
+                      "properties": {
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "success_after_ms": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "success",
+                        "success_after_ms"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "envelopes": {
+                      "type": "object",
+                      "properties": {
+                        "action_check": {
+                          "type": "object",
+                          "properties": {
+                            "encrypted": {
+                              "type": "string"
+                            },
+                            "timestamp": {
+                              "type": "integer"
+                            },
+                            "nonce": {
+                              "type": "string"
+                            },
+                            "v": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "encrypted",
+                            "timestamp",
+                            "nonce",
+                            "v"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "action_log": {
+                          "type": "object",
+                          "properties": {
+                            "encrypted": {
+                              "type": "string"
+                            },
+                            "timestamp": {
+                              "type": "integer"
+                            },
+                            "nonce": {
+                              "type": "string"
+                            },
+                            "v": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "encrypted",
+                            "timestamp",
+                            "nonce",
+                            "v"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "success_log": {
+                          "type": "object",
+                          "properties": {
+                            "encrypted": {
+                              "type": "string"
+                            },
+                            "timestamp": {
+                              "type": "integer"
+                            },
+                            "nonce": {
+                              "type": "string"
+                            },
+                            "v": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "encrypted",
+                            "timestamp",
+                            "nonce",
+                            "v"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "action_log"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "ref",
+                    "class",
+                    "user_id",
+                    "client_ip",
+                    "script",
+                    "envelopes"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "seq",
+              "expires_at",
+              "visits"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "404": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "409": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "KEY_ROTATED",
+                      "PLAN_CHANGED"
+                    ]
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "426": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "429": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": "SLOW_DOWN"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          "headers": [
+            "Retry-After"
+          ]
+        }
+      }
+    },
+    "status": {
+      "method": "GET",
+      "path": "/v0/playground/sessions/{sid}",
+      "query": [
+        "since"
+      ],
+      "request": null,
+      "responses": {
+        "200": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "workflow": {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "none",
+                      "draft",
+                      "queued",
+                      "dry_running",
+                      "ready",
+                      "active",
+                      "paused"
+                    ]
+                  },
+                  "stage": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "stages_total": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "action": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "methods_match": {
+                    "type": "boolean"
+                  },
+                  "method_ok": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "target_ok": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "prediction": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "conv_now": {
+                            "type": "number"
+                          },
+                          "conv_pred": {
+                            "type": "number"
+                          },
+                          "blocked_share": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "conv_now",
+                          "conv_pred",
+                          "blocked_share"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "protecting": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "protection_stage": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "state",
+                  "stage",
+                  "stages_total",
+                  "action",
+                  "methods_match",
+                  "method_ok",
+                  "target_ok",
+                  "prediction",
+                  "protecting",
+                  "protection_stage"
+                ],
+                "additionalProperties": false
+              },
+              "window": {
+                "type": "object",
+                "properties": {
+                  "action_received": {
+                    "type": "integer"
+                  },
+                  "success_received": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "action_received",
+                  "success_received"
+                ],
+                "additionalProperties": false
+              },
+              "stored_since": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "integer"
+                      },
+                      "success": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "success"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "workflow",
+              "window",
+              "stored_since"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "404": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "426": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "telemetry": {
+      "method": "POST",
+      "path": "/v0/playground/sessions/{sid}/telemetry",
+      "request": {
+        "type": "object",
+        "properties": {
+          "chapter": {
+            "type": "integer"
+          },
+          "finding_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "chapter",
+          "finding_ids"
+        ],
+        "additionalProperties": false
+      },
+      "responses": {
+        "204": {
+          "body": null
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "404": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "426": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "complete": {
+      "method": "POST",
+      "path": "/v0/playground/sessions/{sid}/complete",
+      "request": {
+        "type": "object",
+        "properties": {
+          "keep_workflow": {
+            "type": "boolean"
+          },
+          "results": {
+            "type": "object",
+            "properties": {
+              "conv_before": {
+                "type": "number"
+              },
+              "conv_after": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "conv_before",
+              "conv_after"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "keep_workflow"
+        ],
+        "additionalProperties": false
+      },
+      "responses": {
+        "204": {
+          "body": null
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "404": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "426": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "end_session": {
+      "method": "DELETE",
+      "path": "/v0/playground/sessions/{sid}",
+      "request": null,
+      "responses": {
+        "204": {
+          "body": null
+        },
+        "400": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "401": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "404": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "426": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "data": {
+                "type": "null"
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "request_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  }
+}
